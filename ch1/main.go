@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 
 	"gonum.org/v1/plot"
@@ -106,41 +107,45 @@ func main() {
 	// matPrint(get(flatten(X), mat.NewDense(1, 3, []float64{0, 2, 4})))
 
 	p := plot.New()
-	p.Title.Text = "Sin"
-	p.X.Label.Text = "X"
-	p.Y.Label.Text = "Y"
+
 	p.X.Min = 0
 	p.X.Max = 6
 	p.Y.Min = -1
 	p.Y.Max = 1
 
-	p.Add(plotter.NewFunction(math.Sin))
-	// p.Add(plotter.NewFunction(math.Cos))
+	// データの作成
+	pts := makePoints(p.X.Min, p.X.Max, 0.1, math.Sin)
+	pts2 := makePoints(p.X.Min, p.X.Max, 0.1, math.Cos)
 
-	p.Save(vg.Inch*5, vg.Inch*5, "sin.png")
+	// ラインプロットの作成
+	sin, err := plotter.NewLine(pts)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	sin.LineStyle.Width = vg.Points(1)
+	sin.LineStyle.Dashes = []vg.Length{vg.Points(2), vg.Points(2)} // 点線
 
-	// x := []float64{}
-	// y := []float64{}
-	// for i := 0; i < 6/0.1; i++ {
-	// 	x = append(x, float64(i)*0.1)
-	// 	y = append(y, math.Sin(float64(i)*0.1))
-	// }
+	cos, err := plotter.NewLine(pts2)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	cos.LineStyle.Width = vg.Points(1)
+	cos.LineStyle.Dashes = []vg.Length{} // 実線
 
-	// pts := make(plotter.XYs, len(x))
-	// for i := range pts {
-	// 	pts[i].X = x[i]
-	// 	pts[i].Y = y[i]
-	// }
+	p.Add(sin, cos)
+	p.X.Label.Text = "x"
+	p.Y.Label.Text = "y"
+	p.Title.Text = "sin & cos"
+	p.Legend.Add("sin(x)", sin)
+	p.Legend.Add("cos(x)", cos)
+	p.Legend.Top = true
 
-	// l, err := plotter.NewLine(pts)
-
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// p.Add(l)
-
-	// p.Save(vg.Inch*5, vg.Inch*5, "sin.png")
-
+	if err := p.Save(5*vg.Inch, 5*vg.Inch, "sin&cos.png"); err != nil {
+		fmt.Println(err)
+		return
+	}
 }
 
 // func matPrint(X mat.Matrix) {
@@ -205,3 +210,15 @@ func main() {
 
 // 	return mat.NewDense(1, len(b), b)
 // }
+
+// makePointsは、指定された範囲とステップでデータポイントを生成します。
+func makePoints(start, end, step float64, f func(x float64) float64) plotter.XYs {
+	pts := make(plotter.XYs, int((end-start)/step))
+	for i := range pts {
+		x := start + step*float64(i)
+		y := f(x)
+		pts[i].X = x
+		pts[i].Y = y
+	}
+	return pts
+}
