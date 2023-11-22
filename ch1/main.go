@@ -87,6 +87,22 @@ func main() {
 	// A := mat.NewDense(2, 2, []float64{1, 2, 3, 4})
 	// B := mat.NewDense(2, 1, []float64{10, 20})
 	// mulElem(A, B) // panic
+
+	X := mat.NewDense(3, 2, []float64{51, 55, 14, 19, 0, 4})
+	matPrint(X)
+	matPrint(X.RowView(0))
+	matPrint(X.ColView(1))
+	fmt.Println(X.At(0, 1))
+
+	r, _ := X.Dims()
+	for i := 0; i < r; i++ {
+		matPrint(X.RowView(i))
+	}
+	matPrint(X)
+	fmt.Println(flatten(X))
+
+	matPrint(get(flatten(X), mat.NewDense(1, 3, []float64{0, 2, 4})))
+
 }
 
 func matPrint(X mat.Matrix) {
@@ -128,4 +144,26 @@ func scale(a *mat.Dense, f float64) *mat.Dense {
 	var c mat.Dense
 	c.Scale(f, a)
 	return &c
+}
+
+func flatten(a *mat.Dense) []float64 {
+	r, c := a.Dims()
+	fa := make([]float64, r*c)
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			fa[i*c+j] = a.At(i, j)
+		}
+	}
+	return fa
+}
+
+// アクセスしたい複数のindexを配列で受け取る
+func get(arr []float64, idx *mat.Dense) *mat.Dense {
+	b := []float64{}
+	indices := flatten(idx)
+	for _, v := range indices {
+		b = append(b, arr[int(v)])
+	}
+
+	return mat.NewDense(1, len(b), b)
 }
