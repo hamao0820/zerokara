@@ -3,7 +3,6 @@ package main
 import (
 	"math"
 
-	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
@@ -57,7 +56,7 @@ func main() {
 	// C := mat.NewDense(2, 2, []float64{0, 1, 2, 0})
 	// C.Add(A, B)
 
-	A := mat.NewDense(1, 3, []float64{1, 2, 3})
+	// A := mat.NewDense(1, 3, []float64{1, 2, 3})
 	// B := mat.NewDense(1, 3, []float64{2, 4, 6})
 	// C := mat.NewDense(1, 3, []float64{0, 0, 0})
 	// C.Add(A, B)
@@ -115,29 +114,33 @@ func main() {
 	p.Y.Min = -1
 	p.Y.Max = 1
 
-	p.Add(plotter.NewGrid())
-
-	x := []float64{}
-	y := []float64{}
-	for i := 0; i < 6/0.1; i++ {
-		x = append(x, float64(i)*0.1)
-		y = append(y, math.Sin(float64(i)*0.1))
-	}
-
-	pts := make(plotter.XYs, len(x))
-	for i := range pts {
-		pts[i].X = x[i]
-		pts[i].Y = y[i]
-	}
-
-	l, err := plotter.NewLine(pts)
-
-	if err != nil {
-		panic(err)
-	}
-	p.Add(l)
+	p.Add(plotter.NewFunction(math.Sin))
+	// p.Add(plotter.NewFunction(math.Cos))
 
 	p.Save(vg.Inch*5, vg.Inch*5, "sin.png")
+
+	// x := []float64{}
+	// y := []float64{}
+	// for i := 0; i < 6/0.1; i++ {
+	// 	x = append(x, float64(i)*0.1)
+	// 	y = append(y, math.Sin(float64(i)*0.1))
+	// }
+
+	// pts := make(plotter.XYs, len(x))
+	// for i := range pts {
+	// 	pts[i].X = x[i]
+	// 	pts[i].Y = y[i]
+	// }
+
+	// l, err := plotter.NewLine(pts)
+
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// p.Add(l)
+
+	// p.Save(vg.Inch*5, vg.Inch*5, "sin.png")
+
 }
 
 // func matPrint(X mat.Matrix) {
