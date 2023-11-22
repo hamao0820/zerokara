@@ -73,16 +73,20 @@ func main() {
 	// matPrint(C)
 	// matPrint(divElem(A, B))
 
-	A := mat.NewDense(2, 2, []float64{1, 2, 3, 4})
-	matPrint(A)
-	fmt.Println(A.Dims())
-	fmt.Printf("%T\n", A.At(0, 0))
+	// A := mat.NewDense(2, 2, []float64{1, 2, 3, 4})
+	// matPrint(A)
+	// fmt.Println(A.Dims())
+	// fmt.Printf("%T\n", A.At(0, 0))
 
-	B := mat.NewDense(2, 2, []float64{3, 0, 0, 6})
-	matPrint(B)
+	// B := mat.NewDense(2, 2, []float64{3, 0, 0, 6})
+	// matPrint(B)
 
-	matPrint(mul(A, B))
-	matPrint(scale(A, 2))
+	// matPrint(mul(A, B))
+	// matPrint(scale(A, 2))
+
+	// A := mat.NewDense(2, 2, []float64{1, 2, 3, 4})
+	// B := mat.NewDense(2, 1, []float64{10, 20})
+	// mulElem(A, B) // panic
 }
 
 func matPrint(X mat.Matrix) {
