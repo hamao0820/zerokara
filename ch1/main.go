@@ -54,24 +54,35 @@ func main() {
 	// C := mat.NewDense(2, 2, []float64{0, 1, 2, 0})
 	// C.Add(A, B)
 
-	A := mat.NewDense(1, 3, []float64{1, 2, 3})
-	B := mat.NewDense(1, 3, []float64{2, 4, 6})
-	C := mat.NewDense(1, 3, []float64{0, 0, 0})
-	C.Add(A, B)
-	matPrint(C)
-	matPrint(add(A, B))
+	// A := mat.NewDense(1, 3, []float64{1, 2, 3})
+	// B := mat.NewDense(1, 3, []float64{2, 4, 6})
+	// C := mat.NewDense(1, 3, []float64{0, 0, 0})
+	// C.Add(A, B)
+	// matPrint(C)
+	// matPrint(add(A, B))
 
-	C.Sub(A, B)
-	matPrint(C)
-	matPrint(sub(A, B))
+	// C.Sub(A, B)
+	// matPrint(C)
+	// matPrint(sub(A, B))
 
-	C.MulElem(A, B)
-	matPrint(C)
-	matPrint(mulElem(A, B))
+	// C.MulElem(A, B)
+	// matPrint(C)
+	// matPrint(mulElem(A, B))
 
-	C.DivElem(A, B)
-	matPrint(C)
-	matPrint(divElem(A, B))
+	// C.DivElem(A, B)
+	// matPrint(C)
+	// matPrint(divElem(A, B))
+
+	A := mat.NewDense(2, 2, []float64{1, 2, 3, 4})
+	matPrint(A)
+	fmt.Println(A.Dims())
+	fmt.Printf("%T\n", A.At(0, 0))
+
+	B := mat.NewDense(2, 2, []float64{3, 0, 0, 6})
+	matPrint(B)
+
+	matPrint(mul(A, B))
+	matPrint(scale(A, 2))
 }
 
 func matPrint(X mat.Matrix) {
@@ -100,5 +111,17 @@ func mulElem(a, b *mat.Dense) *mat.Dense {
 func divElem(a, b *mat.Dense) *mat.Dense {
 	var c mat.Dense
 	c.DivElem(a, b)
+	return &c
+}
+
+func mul(a, b *mat.Dense) *mat.Dense {
+	var c mat.Dense
+	c.Mul(a, b)
+	return &c
+}
+
+func scale(a *mat.Dense, f float64) *mat.Dense {
+	var c mat.Dense
+	c.Scale(f, a)
 	return &c
 }
