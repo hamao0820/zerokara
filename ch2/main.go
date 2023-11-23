@@ -22,6 +22,11 @@ func main() {
 	fmt.Println(OR(1, 0))
 	fmt.Println(OR(0, 1))
 	fmt.Println(OR(1, 1))
+
+	fmt.Println(XOR(0, 0))
+	fmt.Println(XOR(1, 0))
+	fmt.Println(XOR(0, 1))
+	fmt.Println(XOR(1, 1))
 }
 
 // func AND(x1, x2 float64) float64 {
@@ -64,4 +69,10 @@ func OR(x1, x2 float64) float64 {
 		return 0
 	}
 	return 1
+}
+
+func XOR(x1, x2 float64) float64 {
+	s1 := NAND(x1, x2)
+	s2 := OR(x1, x2)
+	return AND(s1, s2)
 }
