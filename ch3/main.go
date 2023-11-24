@@ -29,7 +29,7 @@ func main() {
 	for i := -5.0; i <= 5.0; i += 0.1 {
 		xs = append(xs, i)
 	}
-	y := Sigmoid(mat.NewDense(1, len(xs), xs))
+	y := StepFunction(mat.NewDense(1, len(xs), xs))
 	pts := make(plotter.XYs, len(xs))
 	for i := range pts {
 		pts[i].X = xs[i]
@@ -41,7 +41,7 @@ func main() {
 	}
 	p.Add(line)
 
-	if err := p.Save(4*vg.Inch, 4*vg.Inch, "sigmoid.png"); err != nil {
+	if err := p.Save(4*vg.Inch, 4*vg.Inch, "step_function.png"); err != nil {
 		panic(err)
 	}
 }
