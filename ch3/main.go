@@ -29,19 +29,30 @@ func main() {
 	for i := -5.0; i <= 5.0; i += 0.1 {
 		xs = append(xs, i)
 	}
-	y := StepFunction(mat.NewDense(1, len(xs), xs))
-	pts := make(plotter.XYs, len(xs))
-	for i := range pts {
-		pts[i].X = xs[i]
-		pts[i].Y = y.At(0, i)
+	ySigmoid := StepFunction(mat.NewDense(1, len(xs), xs))
+	yStepFUnction := Sigmoid(mat.NewDense(1, len(xs), xs))
+	ptsSigmoid := make(plotter.XYs, len(xs))
+	ptsStepFunction := make(plotter.XYs, len(xs))
+	for i := range ptsSigmoid {
+		ptsSigmoid[i].X = xs[i]
+		ptsSigmoid[i].Y = ySigmoid.At(0, i)
+		ptsStepFunction[i].X = xs[i]
+		ptsStepFunction[i].Y = yStepFUnction.At(0, i)
 	}
-	line, err := plotter.NewLine(pts)
+	sigmoid, err := plotter.NewLine(ptsSigmoid)
 	if err != nil {
 		panic(err)
 	}
-	p.Add(line)
+	stepFunction, err := plotter.NewLine(ptsStepFunction)
+	if err != nil {
+		panic(err)
+	}
+	sigmoid.LineStyle.Width = vg.Points(1)
+	sigmoid.LineStyle.Dashes = []vg.Length{vg.Points(2), vg.Points(2)}
+	p.Add(sigmoid)
+	p.Add(stepFunction)
 
-	if err := p.Save(4*vg.Inch, 4*vg.Inch, "step_function.png"); err != nil {
+	if err := p.Save(4*vg.Inch, 4*vg.Inch, "step_function&sigmoid.png"); err != nil {
 		panic(err)
 	}
 }
