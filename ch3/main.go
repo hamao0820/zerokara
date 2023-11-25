@@ -3,10 +3,8 @@ package main
 import (
 	"math"
 
+	"github.com/hamao0820/zerokara/util"
 	"gonum.org/v1/gonum/mat"
-	"gonum.org/v1/plot"
-	"gonum.org/v1/plot/plotter"
-	"gonum.org/v1/plot/vg"
 )
 
 func main() {
@@ -22,32 +20,42 @@ func main() {
 	// y := ReLU(x)
 	// util.MatPrint(y)
 
-	p := plot.New()
+	// p := plot.New()
 
-	p.X.Min = -6
-	p.X.Max = 6
-	p.Y.Min = -0.1
-	p.Y.Max = 5.5
+	// p.X.Min = -6
+	// p.X.Max = 6
+	// p.Y.Min = -0.1
+	// p.Y.Max = 5.5
 
-	xs := []float64{}
-	for i := -5.0; i <= 5.0; i += 0.1 {
-		xs = append(xs, i)
-	}
-	y := ReLU(mat.NewDense(1, len(xs), xs))
-	pts := make(plotter.XYs, len(xs))
-	for i := range pts {
-		pts[i].X = xs[i]
-		pts[i].Y = y.At(0, i)
-	}
-	l, err := plotter.NewLine(pts)
-	if err != nil {
-		panic(err)
-	}
-	p.Add(l)
+	// xs := []float64{}
+	// for i := -5.0; i <= 5.0; i += 0.1 {
+	// 	xs = append(xs, i)
+	// }
+	// y := ReLU(mat.NewDense(1, len(xs), xs))
+	// pts := make(plotter.XYs, len(xs))
+	// for i := range pts {
+	// 	pts[i].X = xs[i]
+	// 	pts[i].Y = y.At(0, i)
+	// }
+	// l, err := plotter.NewLine(pts)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// p.Add(l)
 
-	if err := p.Save(4*vg.Inch, 4*vg.Inch, "relu.png"); err != nil {
-		panic(err)
-	}
+	// if err := p.Save(4*vg.Inch, 4*vg.Inch, "relu.png"); err != nil {
+	// 	panic(err)
+	// }
+
+	A := mat.NewDense(2, 2, []float64{1, 2, 3, 4})
+	B := mat.NewDense(2, 2, []float64{5, 6, 7, 8})
+
+	util.MatPrint(util.Mul(A, B))
+
+	A = mat.NewDense(2, 3, []float64{1, 2, 3, 4, 5, 6})
+	B = mat.NewDense(3, 2, []float64{1, 2, 3, 4, 5, 6})
+
+	util.MatPrint(util.Mul(A, B))
 }
 
 func StepFunction(x mat.Matrix) mat.Matrix {
