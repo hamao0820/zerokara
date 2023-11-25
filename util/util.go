@@ -46,3 +46,15 @@ func Scale(a mat.Matrix, f float64) mat.Matrix {
 	c.Scale(f, a)
 	return &c
 }
+
+func SubScalar(a mat.Matrix, f float64) mat.Matrix {
+	var c mat.Dense
+	c.Apply(func(_, _ int, v float64) float64 { return v - f }, a)
+	return &c
+}
+
+func AddScalar(a mat.Matrix, f float64) mat.Matrix {
+	var c mat.Dense
+	c.Apply(func(_, _ int, v float64) float64 { return v + f }, a)
+	return &c
+}
