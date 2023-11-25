@@ -11,37 +11,37 @@ func MatPrint(X mat.Matrix) {
 	fmt.Printf("%v\n", fa)
 }
 
-func Add(a, b *mat.Dense) *mat.Dense {
+func Add(a, b mat.Matrix) mat.Matrix {
 	var c mat.Dense
 	c.Add(a, b)
 	return &c
 }
 
-func Sub(a, b *mat.Dense) *mat.Dense {
+func Sub(a, b mat.Matrix) mat.Matrix {
 	var c mat.Dense
 	c.Sub(a, b)
 	return &c
 }
 
-func MulElem(a, b *mat.Dense) *mat.Dense {
+func MulElem(a, b mat.Matrix) mat.Matrix {
 	var c mat.Dense
 	c.MulElem(a, b)
 	return &c
 }
 
-func DivElem(a, b *mat.Dense) *mat.Dense {
+func DivElem(a, b mat.Matrix) mat.Matrix {
 	var c mat.Dense
 	c.DivElem(a, b)
 	return &c
 }
 
-func Mul(a, b *mat.Dense) *mat.Dense {
+func Mul(a, b mat.Matrix) mat.Matrix {
 	var c mat.Dense
 	c.Mul(a, b)
 	return &c
 }
 
-func Scale(a *mat.Dense, f float64) *mat.Dense {
+func Scale(a mat.Matrix, f float64) mat.Matrix {
 	var c mat.Dense
 	c.Scale(f, a)
 	return &c
