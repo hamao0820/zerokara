@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/hamao0820/zerokara/util"
@@ -104,10 +105,20 @@ func main() {
 
 	// util.MatPrint(Y)
 
-	network := NewNetwork()
-	X := mat.NewDense(1, 2, []float64{1.0, 0.5})
-	Y := Forward(network, X)
-	util.MatPrint(Y)
+	// network := NewNetwork()
+	// X := mat.NewDense(1, 2, []float64{1.0, 0.5})
+	// Y := Forward(network, X)
+	// util.MatPrint(Y)
+
+	a := mat.NewDense(1, 3, []float64{0.3, 2.9, 4.0})
+
+	expA := Exp(a)
+	util.MatPrint(expA)
+	sumExpA := mat.Sum(expA)
+	fmt.Println(sumExpA)
+	y := util.Scale(expA, 1/sumExpA)
+	util.MatPrint(y)
+	util.MatPrint(Softmax(a))
 }
 
 func StepFunction(x mat.Matrix) mat.Matrix {
@@ -142,6 +153,21 @@ func ReLU(x mat.Matrix) mat.Matrix {
 
 func IdentityFunction(x mat.Matrix) mat.Matrix {
 	return x
+}
+
+func Exp(x mat.Matrix) mat.Matrix {
+	exp := func(_, _ int, v float64) float64 {
+		return math.Exp(v)
+	}
+	var y mat.Dense
+	y.Apply(exp, x)
+	return &y
+}
+
+func Softmax(x mat.Matrix) mat.Matrix {
+	expX := Exp(x)
+	sumExpX := mat.Sum(expX)
+	return util.Scale(expX, 1/sumExpX)
 }
 
 func NewNetwork() map[string]mat.Matrix {
