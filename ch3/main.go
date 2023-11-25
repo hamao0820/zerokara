@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/hamao0820/zerokara/util"
@@ -47,15 +48,23 @@ func main() {
 	// 	panic(err)
 	// }
 
-	A := mat.NewDense(2, 2, []float64{1, 2, 3, 4})
-	B := mat.NewDense(2, 2, []float64{5, 6, 7, 8})
+	// A := mat.NewDense(2, 2, []float64{1, 2, 3, 4})
+	// B := mat.NewDense(2, 2, []float64{5, 6, 7, 8})
 
-	util.MatPrint(util.Mul(A, B))
+	// util.MatPrint(util.Mul(A, B))
 
-	A = mat.NewDense(2, 3, []float64{1, 2, 3, 4, 5, 6})
-	B = mat.NewDense(3, 2, []float64{1, 2, 3, 4, 5, 6})
+	// A = mat.NewDense(2, 3, []float64{1, 2, 3, 4, 5, 6})
+	// B = mat.NewDense(3, 2, []float64{1, 2, 3, 4, 5, 6})
 
-	util.MatPrint(util.Mul(A, B))
+	// util.MatPrint(util.Mul(A, B))
+
+	X := mat.NewDense(1, 2, []float64{1, 2})
+	fmt.Println(X.Dims())
+	W := mat.NewDense(2, 3, []float64{1, 3, 5, 2, 4, 6})
+	util.MatPrint(W)
+	fmt.Println(W.Dims())
+	Y := util.Mul(X, W)
+	util.MatPrint(Y)
 }
 
 func StepFunction(x mat.Matrix) mat.Matrix {
