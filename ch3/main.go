@@ -58,12 +58,51 @@ func main() {
 
 	// util.MatPrint(util.Mul(A, B))
 
-	X := mat.NewDense(1, 2, []float64{1, 2})
+	// X := mat.NewDense(1, 2, []float64{1, 2})
+	// fmt.Println(X.Dims())
+	// W := mat.NewDense(2, 3, []float64{1, 3, 5, 2, 4, 6})
+	// util.MatPrint(W)
+	// fmt.Println(W.Dims())
+	// Y := util.Mul(X, W)
+	// util.MatPrint(Y)
+
+	X := mat.NewDense(1, 2, []float64{1.0, 0.5})
+	W1 := mat.NewDense(2, 3, []float64{0.1, 0.3, 0.5, 0.2, 0.4, 0.6})
+	B1 := mat.NewDense(1, 3, []float64{0.1, 0.2, 0.3})
+
 	fmt.Println(X.Dims())
-	W := mat.NewDense(2, 3, []float64{1, 3, 5, 2, 4, 6})
-	util.MatPrint(W)
-	fmt.Println(W.Dims())
-	Y := util.Mul(X, W)
+	fmt.Println(W1.Dims())
+	fmt.Println(B1.Dims())
+
+	A1 := util.Add(util.Mul(X, W1), B1)
+	Z1 := Sigmoid(A1)
+
+	util.MatPrint(A1)
+	util.MatPrint(Z1)
+
+	W2 := mat.NewDense(3, 2, []float64{0.1, 0.4, 0.2, 0.5, 0.3, 0.6})
+	B2 := mat.NewDense(1, 2, []float64{0.1, 0.2})
+
+	fmt.Println(Z1.Dims())
+	fmt.Println(W2.Dims())
+	fmt.Println(B2.Dims())
+
+	A2 := util.Add(util.Mul(Z1, W2), B2)
+	Z2 := Sigmoid(A2)
+
+	util.MatPrint(A2)
+	util.MatPrint(Z2)
+
+	W3 := mat.NewDense(2, 2, []float64{0.1, 0.3, 0.2, 0.4})
+	B3 := mat.NewDense(1, 2, []float64{0.1, 0.2})
+
+	fmt.Println(Z2.Dims())
+	fmt.Println(W3.Dims())
+	fmt.Println(B3.Dims())
+
+	A3 := util.Add(util.Mul(Z2, W3), B3)
+	Y := IdentityFunction(A3)
+
 	util.MatPrint(Y)
 }
 
@@ -95,4 +134,8 @@ func ReLU(x mat.Matrix) mat.Matrix {
 	var y mat.Dense
 	y.Apply(relu, x)
 	return &y
+}
+
+func IdentityFunction(x mat.Matrix) mat.Matrix {
+	return x
 }
