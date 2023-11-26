@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"image/png"
+	"log"
 	"math"
 	"os"
 
@@ -144,6 +146,13 @@ func main() {
 	img, _ := trainDataSet.Get(0)
 	fmt.Println(img.Bounds().Size())
 
+	file, err := os.Create("sample.png")
+	if err != nil {
+		log.Println("Cannot create file:", err)
+	}
+	defer file.Close()
+
+	png.Encode(file, img)
 }
 
 func StepFunction(x mat.Matrix) mat.Matrix {
