@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"math"
+	"os"
 
 	"github.com/hamao0820/zerokara/util"
 	"gonum.org/v1/gonum/mat"
@@ -119,15 +121,29 @@ func main() {
 	// util.MatPrint(y)
 	// util.MatPrint(Softmax(a))
 
-	a := mat.NewDense(1, 3, []float64{1010, 1000, 990})
-	expX := Exp(a)
-	sumExpX := mat.Sum(expX)
-	util.MatPrint(util.Scale(expX, 1/sumExpX))
+	// a := mat.NewDense(1, 3, []float64{1010, 1000, 990})
+	// expX := Exp(a)
+	// sumExpX := mat.Sum(expX)
+	// util.MatPrint(util.Scale(expX, 1/sumExpX))
 
-	c := mat.Max(a)
-	expX = Exp(util.SubScalar(a, c))
-	sumExpX = mat.Sum(expX)
-	util.MatPrint(util.Scale(expX, 1/sumExpX))
+	// c := mat.Max(a)
+	// expX = Exp(util.SubScalar(a, c))
+	// sumExpX = mat.Sum(expX)
+	// util.MatPrint(util.Scale(expX, 1/sumExpX))
+
+	d, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	trainDataSet, testDataSet, err := Load(d)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(trainDataSet.Count())
+	fmt.Println(testDataSet.Count())
+	img, _ := trainDataSet.Get(0)
+	fmt.Println(img.Bounds().Size())
+
 }
 
 func StepFunction(x mat.Matrix) mat.Matrix {
