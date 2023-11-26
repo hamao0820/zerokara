@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"image/png"
-	"log"
 	"math"
 	"os"
 
@@ -133,26 +131,42 @@ func main() {
 	// sumExpX = mat.Sum(expX)
 	// util.MatPrint(util.Scale(expX, 1/sumExpX))
 
+	// d, err := os.Getwd()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// trainDataSet, testDataSet, err := Load(d)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(trainDataSet.Count())
+	// fmt.Println(testDataSet.Count())
+	// img, _ := trainDataSet.Get(0)
+	// fmt.Println(img.Bounds().Size())
+
+	// file, err := os.Create("sample.png")
+	// if err != nil {
+	// 	log.Println("Cannot create file:", err)
+	// }
+	// defer file.Close()
+
+	// png.Encode(file, img)
+
 	d, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
-	trainDataSet, testDataSet, err := Load(d)
+	trainDataset, testDataset, err := LoadMatrix(d)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(trainDataSet.Count())
-	fmt.Println(testDataSet.Count())
-	img, _ := trainDataSet.Get(0)
-	fmt.Println(img.Bounds().Size())
+	xTrain, tTrain := trainDataset.Images, trainDataset.Labels
+	xTest, tTest := testDataset.Images, testDataset.Labels
 
-	file, err := os.Create("sample.png")
-	if err != nil {
-		log.Println("Cannot create file:", err)
-	}
-	defer file.Close()
-
-	png.Encode(file, img)
+	fmt.Println(xTrain.Dims())
+	fmt.Println(tTrain.Dims())
+	fmt.Println(xTest.Dims())
+	fmt.Println(tTest.Dims())
 }
 
 func StepFunction(x mat.Matrix) mat.Matrix {

@@ -9,6 +9,8 @@ import (
 	"io"
 	"os"
 	"path"
+
+	"gonum.org/v1/gonum/mat"
 )
 
 var (
@@ -44,6 +46,11 @@ type Label int8
 type Set struct {
 	Images []*Image
 	Labels []Label
+}
+
+type SetMatrix struct {
+	Images *mat.Dense
+	Labels *mat.Dense
 }
 
 type imageFileHeader struct {
@@ -218,4 +225,42 @@ func Load(dir string) (training, test *Set, err error) {
 	}
 
 	return
+}
+
+func LoadMatrix(dir string) (training, test *SetMatrix, err error) {
+	trainData, testData, err := Load(dir)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	trainImageArr := make([]float64, trainData.Count()*Width*Height)
+	trainLabelsArr := make([]float64, trainData.Count())
+	testImageArr := make([]float64, testData.Count()*Width*Height)
+	testLabelsArr := make([]float64, testData.Count())
+
+	for i := 0; i < trainData.Count(); i++ {
+		for j := 0; j < Width*Height; j++ {
+			trainImageArr[i*Width*Height+j] = float64(trainData.Images[i][j])
+		}
+		trainLabelsArr[i] = float64(trainData.Labels[i])
+	}
+
+	for i := 0; i < testData.Count(); i++ {
+		for j := 0; j < Width*Height; j++ {
+			testImageArr[i*Width*Height+j] = float64(testData.Images[i][j])
+		}
+		testLabelsArr[i] = float64(testData.Labels[i])
+	}
+
+	training = &SetMatrix{
+		Images: mat.NewDense(trainData.Count(), Width*Height, trainImageArr),
+		Labels: mat.NewDense(1, trainData.Count(), trainLabelsArr),
+	}
+
+	test = &SetMatrix{
+		Images: mat.NewDense(testData.Count(), Width*Height, testImageArr),
+		Labels: mat.NewDense(1, testData.Count(), testLabelsArr),
+	}
+
+	return training, test, nil
 }
