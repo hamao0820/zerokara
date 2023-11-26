@@ -1,4 +1,4 @@
-package mnist
+package main
 
 import (
 	"compress/gzip"
@@ -27,10 +27,10 @@ const (
 
 // MNIST database file names.
 const (
-	TrainingImageFileName = "train-images-idx3-ubyte.gz"
-	TrainingLabelFileName = "train-labels-idx1-ubyte.gz"
-	TestImageFileName     = "t10k-images-idx3-ubyte.gz"
-	TestLabelFileName     = "t10k-labels-idx1-ubyte.gz"
+	TrainingImageFileName = "data/train-images-idx3-ubyte.gz"
+	TrainingLabelFileName = "data/train-labels-idx1-ubyte.gz"
+	TestImageFileName     = "data/t10k-images-idx3-ubyte.gz"
+	TestLabelFileName     = "data/t10k-labels-idx1-ubyte.gz"
 )
 
 // Image represents a MNIST image. It is a array a bytes representing the color.
@@ -93,7 +93,7 @@ func LoadImageFile(name string) ([]*Image, error) {
 
 	if header.Magic != imageMagic ||
 		header.Width != Width ||
-		header.Height != header.Height {
+		header.Height != Height {
 		return nil, ErrFormat
 	}
 
