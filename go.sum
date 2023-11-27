@@ -35,6 +35,8 @@ github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0/go.mod h1:E/TSTwGw
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/nlpodyssey/gopickle v0.2.0 h1:4naD2DVylYJupQLbCQFdwo6yiXEmPyp+0xf5MVlrBDY=
 github.com/nlpodyssey/gopickle v0.2.0/go.mod h1:YIUwjJ2O7+vnBsxUN+MHAAI3N+adqEGiw+nDpwW95bY=
+github.com/petar/GoMNIST v0.0.0-20150320212226-2fbe10d0fa63 h1:xS51uYfMeRA+pLKKsXaM/UI06LkyRQ1ItZgOvrOgIu8=
+github.com/petar/GoMNIST v0.0.0-20150320212226-2fbe10d0fa63/go.mod h1:d7fwuOuDrb75/3iplL4oWbe4MBZgWil/pSVR3ItECVU=
 github.com/phpdave11/gofpdi v1.0.13/go.mod h1:vBmVV0Do6hSBHC8uKUQ71JGW+ZGQq74llk/7bXwjDoI=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

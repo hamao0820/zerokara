@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"strings"
 
 	"github.com/hamao0820/zerokara/util"
+	"github.com/sbinet/npyio/npz"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -152,21 +154,39 @@ func main() {
 
 	// png.Encode(file, img)
 
-	d, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	trainDataset, testDataset, err := LoadMatrix(d)
-	if err != nil {
-		panic(err)
-	}
-	xTrain, tTrain := trainDataset.Images, trainDataset.Labels
-	xTest, tTest := testDataset.Images, testDataset.Labels
+	// d, err := os.Getwd()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// trainDataset, testDataset, err := LoadMatrix(d)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// xTrain, tTrain := trainDataset.Images, trainDataset.Labels
+	// xTest, tTest := testDataset.Images, testDataset.Labels
 
-	fmt.Println(xTrain.Dims())
-	fmt.Println(tTrain.Dims())
-	fmt.Println(xTest.Dims())
-	fmt.Println(tTest.Dims())
+	// fmt.Println(xTrain.Dims())
+	// fmt.Println(tTrain.Dims())
+	// fmt.Println(xTest.Dims())
+	// fmt.Println(tTest.Dims())
+
+	x, t := getData()
+	network, err := NewNetwork()
+	if err != nil {
+		panic(err)
+	}
+
+	accuracyCnt := 0
+	for i := 0; i < x.(*mat.Dense).RawMatrix().Rows; i++ {
+		y := predict(network, x.(*mat.Dense).RowView(i).T())
+		fmt.Println(y)
+		_, p := Argmax(y)
+		if p == int(t.(*mat.Dense).At(0, i)) {
+			accuracyCnt++
+		}
+	}
+
+	fmt.Println("Accuracy:", float64(accuracyCnt)/float64(x.(*mat.Dense).RawMatrix().Rows))
 }
 
 func StepFunction(x mat.Matrix) mat.Matrix {
@@ -219,15 +239,48 @@ func Softmax(x mat.Matrix) mat.Matrix {
 	return util.Scale(expX, 1/sumExpX)
 }
 
-func NewNetwork() map[string]mat.Matrix {
-	network := map[string]mat.Matrix{}
-	network["W1"] = mat.NewDense(2, 3, []float64{0.1, 0.3, 0.5, 0.2, 0.4, 0.6})
-	network["b1"] = mat.NewDense(1, 3, []float64{0.1, 0.2, 0.3})
-	network["W2"] = mat.NewDense(3, 2, []float64{0.1, 0.4, 0.2, 0.5, 0.3, 0.6})
-	network["b2"] = mat.NewDense(1, 2, []float64{0.1, 0.2})
-	network["W3"] = mat.NewDense(2, 2, []float64{0.1, 0.3, 0.2, 0.4})
-	network["b3"] = mat.NewDense(1, 2, []float64{0.1, 0.2})
-	return network
+func NewNetwork() (map[string]mat.Matrix, error) {
+	f, err := npz.Open("data/sample_weight.npz")
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	var network = map[string]mat.Matrix{}
+	for _, name := range f.Keys() {
+		m, err := LoadNPY(f, name)
+		if err != nil {
+			return nil, err
+		}
+		network[strings.Split(name, ".npy")[0]] = m
+	}
+	return network, nil
+}
+
+func LoadNPY(z *npz.Reader, name string) (mat.Matrix, error) {
+	shape := z.Header(name).Descr.Shape
+	var raw []float32
+	if len(shape) == 1 {
+		raw = make([]float32, shape[0])
+	} else {
+		raw = make([]float32, shape[0]*shape[1])
+	}
+
+	err := z.Read(name, &raw)
+	if err != nil {
+		return nil, err
+	}
+	var raw64 []float64
+	for _, v := range raw {
+		raw64 = append(raw64, float64(v))
+	}
+	var m *mat.Dense
+	if len(shape) == 1 {
+		m = mat.NewDense(1, shape[0], raw64)
+		return m, nil
+	}
+	m = mat.NewDense(shape[0], shape[1], raw64)
+	return m, nil
 }
 
 func Forward(network map[string]mat.Matrix, x mat.Matrix) mat.Matrix {
@@ -242,4 +295,51 @@ func Forward(network map[string]mat.Matrix, x mat.Matrix) mat.Matrix {
 	Y := IdentityFunction(A3)
 
 	return Y
+}
+
+func getData() (x, t mat.Matrix) {
+	d, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	_, testDataset, err := LoadMatrix(d)
+	if err != nil {
+		panic(err)
+	}
+
+	xTest, tTest := testDataset.Images, testDataset.Labels
+	return xTest, tTest
+}
+
+func predict(network map[string]mat.Matrix, x mat.Matrix) mat.Matrix {
+	W1, W2, W3 := network["W1"], network["W2"], network["W3"]
+	b1, b2, b3 := network["b1"], network["b2"], network["b3"]
+
+	A1 := util.Add(util.Mul(x, W1), b1)
+	Z1 := Sigmoid(A1)
+	A2 := util.Add(util.Mul(Z1, W2), b2)
+	Z2 := Sigmoid(A2)
+	A3 := util.Add(util.Mul(Z2, W3), b3)
+	Y := Softmax(A3)
+
+	return Y
+}
+
+func Argmax(matrix mat.Matrix) (int, int) {
+	rows, cols := matrix.Dims()
+
+	var maxVal float64
+	var maxRow, maxCol int
+
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			val := matrix.At(i, j)
+			if val > maxVal {
+				maxVal = val
+				maxRow, maxCol = i, j
+			}
+		}
+	}
+
+	return maxRow, maxCol
 }
