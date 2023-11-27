@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"math"
-	"os"
+	"strings"
 
 	"github.com/hamao0820/zerokara/matrix"
-	"github.com/sbinet/npyio"
+	"github.com/sbinet/npyio/npz"
 )
 
 func main() {
@@ -233,26 +233,25 @@ func Softmax(x matrix.Matrix) matrix.Matrix {
 }
 
 func NewNetwork() (map[string]matrix.Matrix, error) {
-	weights := []string{"W1", "W2", "W3", "b1", "b2", "b3"}
+	f, err := npz.Open("data/sample_weight.npz")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
 	network := map[string]matrix.Matrix{}
-	for _, w := range weights {
-		p := fmt.Sprintf("data/weights/%s.npy", w)
-		f, err := os.Open(p)
-		if err != nil {
-			return nil, err
-		}
-		defer f.Close()
-
-		r, err := npyio.NewReader(f)
+	for _, name := range f.Keys() {
+		var f_ []float32
+		err := f.Read(name, &f_)
 		if err != nil {
 			return nil, err
 		}
 
-		shape := r.Header.Descr.Shape
+		shape := f.Header(name).Descr.Shape
 
 		if len(shape) == 1 {
 			raw := make([]float32, shape[0])
-			err = r.Read(&raw)
+			err = f.Read(name, &raw)
 			if err != nil {
 				return nil, err
 			}
@@ -262,15 +261,14 @@ func NewNetwork() (map[string]matrix.Matrix, error) {
 				tmp = append(tmp, float64(v))
 			}
 
-			network[w] = matrix.New1D(tmp...)
-
+			network[strings.Split(name, ".npy")[0]] = matrix.New1D(tmp...)
 			continue
 		}
 
 		raw := make([]float32, shape[0]*shape[1])
-		err = r.Read(&raw)
+		err = f.Read(name, &raw)
 		if err != nil {
-			return nil, err
+			panic(err)
 		}
 
 		var raw64 [][]float64
@@ -282,7 +280,7 @@ func NewNetwork() (map[string]matrix.Matrix, error) {
 			raw64 = append(raw64, tmp)
 		}
 
-		network[w] = matrix.New2D(raw64)
+		network[strings.Split(name, ".npy")[0]] = matrix.New2D(raw64)
 	}
 
 	return network, nil
