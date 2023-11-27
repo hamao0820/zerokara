@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"strings"
 
@@ -131,18 +130,32 @@ func main() {
 	// sumExpX = mat.Sum(expX)
 	// util.MatPrint(util.Scale(expX, 1/sumExpX))
 
-	// d, err := os.Getwd()
-	// if err != nil {
-	// 	panic(err)
+	// train := NewMnist(Train(true))
+	// test := NewMnist(Train(false))
+
+	// fmt.Println(train.Len())
+	// fmt.Println(test.Len())
+
+	// xTrain, tTrain := train.Get(0)
+	// xTest, tTest := test.Get(0)
+	// fmt.Println(xTrain.Dims())
+	// fmt.Println(tTrain.Dims())
+	// fmt.Println(xTest.Dims())
+	// fmt.Println(tTest.Dims())
+
+	// train := NewMnist(Train(true))
+	// xTrain, _ := train.Get(0)
+
+	// xTrain.Reshape(matrix.Shape{28, 28})
+	// img := image.NewRGBA(image.Rect(0, 0, 28, 28))
+	// bg := color.RGBA{255, 255, 255, 255}
+	// draw.Draw(img, img.Bounds(), &image.Uniform{bg}, image.Point{}, draw.Src)
+	// for y := 0; y < xTrain.Cols(); y++ {
+	// 	for x := 0; x < xTrain.Rows(); x++ {
+	// 		v := uint8(xTrain.At(y, x))
+	// 		img.Set(x, y, color.Gray{v})
+	// 	}
 	// }
-	// trainDataSet, testDataSet, err := Load(d)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println(trainDataSet.Count())
-	// fmt.Println(testDataSet.Count())
-	// img, _ := trainDataSet.Get(0)
-	// fmt.Println(img.Bounds().Size())
 
 	// file, err := os.Create("sample.png")
 	// if err != nil {
@@ -168,24 +181,24 @@ func main() {
 	// fmt.Println(xTest.Dims())
 	// fmt.Println(tTest.Dims())
 
-	gray := func(m matrix.Matrix) matrix.Matrix { return m.CopyDivFloat(255) }
-	testSet := NewMnist(TransformData(gray))
-	network, err := NewNetwork()
-	if err != nil {
-		panic(err)
-	}
+	// gray := func(m matrix.Matrix) matrix.Matrix { return m.CopyDivFloat(255) }
+	// testSet := NewMnist(TransformData(gray))
+	// network, err := NewNetwork()
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	accuracyCnt := 0
-	for i := 0; i < testSet.Len(); i++ {
-		img, label := testSet.Get(i)
-		y := predict(network, img)
-		_, c := Argmax(y)
-		if c == int(label.At(0, 0)) {
-			accuracyCnt++
-		}
-	}
+	// accuracyCnt := 0
+	// for i := 0; i < testSet.Len(); i++ {
+	// 	img, label := testSet.Get(i)
+	// 	y := predict(network, img)
+	// 	_, c := Argmax(y)
+	// 	if c == int(label.At(0, 0)) {
+	// 		accuracyCnt++
+	// 	}
+	// }
 
-	fmt.Println("Accuracy:", float64(accuracyCnt)/float64(testSet.Len()))
+	// fmt.Println("Accuracy:", float64(accuracyCnt)/float64(testSet.Len()))
 }
 
 func StepFunction(x matrix.Matrix) matrix.Matrix {
