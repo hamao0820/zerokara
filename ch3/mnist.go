@@ -8,16 +8,11 @@ import (
 )
 
 const (
-	TRAIN_URL      = "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz"
-	LABEL_URL      = "http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz"
-	TEST_TRAIN_URL = "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz"
-	TEST_LABEL_URL = "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz"
-
-	LOCAL_DATA_PATH        = "data"
-	LOCAL_TRAIN_PATH       = LOCAL_DATA_PATH + "/train-images-idx3-ubyte.gz"
-	LOCAL_LABELS_PATH      = LOCAL_DATA_PATH + "/train-labels-idx1-ubyte.gz"
-	LOCAL_TEST_TRAIN_PATH  = LOCAL_DATA_PATH + "/t10k-images-idx3-ubyte.gz"
-	LOCAL_TEST_LABELS_PATH = LOCAL_DATA_PATH + "/t10k-labels-idx1-ubyte.gz"
+	DATA_PATH        = "data"
+	TRAIN_PATH       = DATA_PATH + "/train-images-idx3-ubyte.gz"
+	LABELS_PATH      = DATA_PATH + "/train-labels-idx1-ubyte.gz"
+	TEST_TRAIN_PATH  = DATA_PATH + "/t10k-images-idx3-ubyte.gz"
+	TEST_LABELS_PATH = DATA_PATH + "/t10k-labels-idx1-ubyte.gz"
 )
 
 type (
@@ -55,7 +50,7 @@ func ApplyDataSetOpt(options ...DatasetOption) datasetOption {
 func NewMnist(options ...DatasetOption) Dataset {
 	opt := ApplyDataSetOpt(options...)
 
-	trainSet, testSet, err := GoMNIST.Load(LOCAL_DATA_PATH)
+	trainSet, testSet, err := GoMNIST.Load(DATA_PATH)
 	if err != nil {
 		panic(err)
 	}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"strings"
 
@@ -181,24 +182,24 @@ func main() {
 	// fmt.Println(xTest.Dims())
 	// fmt.Println(tTest.Dims())
 
-	// gray := func(m matrix.Matrix) matrix.Matrix { return m.CopyDivFloat(255) }
-	// testSet := NewMnist(TransformData(gray))
-	// network, err := NewNetwork()
-	// if err != nil {
-	// 	panic(err)
-	// }
+	gray := func(m matrix.Matrix) matrix.Matrix { return m.CopyDivFloat(255) }
+	testSet := NewMnist(TransformData(gray))
+	network, err := NewNetwork()
+	if err != nil {
+		panic(err)
+	}
 
-	// accuracyCnt := 0
-	// for i := 0; i < testSet.Len(); i++ {
-	// 	img, label := testSet.Get(i)
-	// 	y := predict(network, img)
-	// 	_, c := Argmax(y)
-	// 	if c == int(label.At(0, 0)) {
-	// 		accuracyCnt++
-	// 	}
-	// }
+	accuracyCnt := 0
+	for i := 0; i < testSet.Len(); i++ {
+		img, label := testSet.Get(i)
+		y := predict(network, img)
+		p := int(y.ArgMax().At(0, 0))
+		if p == int(label.At(0, 0)) {
+			accuracyCnt++
+		}
+	}
 
-	// fmt.Println("Accuracy:", float64(accuracyCnt)/float64(testSet.Len()))
+	fmt.Println("Accuracy:", float64(accuracyCnt)/float64(testSet.Len()))
 }
 
 func StepFunction(x matrix.Matrix) matrix.Matrix {
@@ -325,23 +326,4 @@ func predict(network map[string]matrix.Matrix, x matrix.Matrix) matrix.Matrix {
 	Y := Softmax(A3)
 
 	return Y
-}
-
-func Argmax(matrix matrix.Matrix) (int, int) {
-	rows, cols := matrix.Dims()
-
-	var maxVal float64
-	var maxRow, maxCol int
-
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j++ {
-			val := matrix.At(i, j)
-			if val > maxVal {
-				maxVal = val
-				maxRow, maxCol = i, j
-			}
-		}
-	}
-
-	return maxRow, maxCol
 }
