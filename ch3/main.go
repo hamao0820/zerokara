@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"math"
 	"os"
-	"strings"
 
-	"github.com/hamao0820/zerokara/util"
-	"github.com/sbinet/npyio/npz"
-	"gonum.org/v1/gonum/mat"
+	"github.com/hamao0820/zerokara/matrix"
+	"github.com/sbinet/npyio"
 )
 
 func main() {
@@ -170,162 +168,155 @@ func main() {
 	// fmt.Println(xTest.Dims())
 	// fmt.Println(tTest.Dims())
 
-	x, t := getData()
+	gray := func(m matrix.Matrix) matrix.Matrix { return m.CopyDivFloat(255) }
+	testSet := NewMnist(TransformData(gray))
 	network, err := NewNetwork()
 	if err != nil {
 		panic(err)
 	}
 
 	accuracyCnt := 0
-	for i := 0; i < x.(*mat.Dense).RawMatrix().Rows; i++ {
-		y := predict(network, x.(*mat.Dense).RowView(i).T())
-		fmt.Println(y)
-		_, p := Argmax(y)
-		if p == int(t.(*mat.Dense).At(0, i)) {
+	for i := 0; i < testSet.Len(); i++ {
+		img, label := testSet.Get(i)
+		y := predict(network, img)
+		_, c := Argmax(y)
+		if c == int(label.At(0, 0)) {
 			accuracyCnt++
 		}
 	}
 
-	fmt.Println("Accuracy:", float64(accuracyCnt)/float64(x.(*mat.Dense).RawMatrix().Rows))
+	fmt.Println("Accuracy:", float64(accuracyCnt)/float64(testSet.Len()))
 }
 
-func StepFunction(x mat.Matrix) mat.Matrix {
-	stepFunction := func(_, _ int, v float64) float64 {
+func StepFunction(x matrix.Matrix) matrix.Matrix {
+	stepFunction := func(v float64) float64 {
 		if v <= 0 {
 			return 0
 		}
 		return 1
 	}
-	var y mat.Dense
-	y.Apply(stepFunction, x)
-	return &y
+	y := x.Copy()
+	y.Apply(stepFunction)
+	return y
 }
 
-func Sigmoid(x mat.Matrix) mat.Matrix {
-	sigmoid := func(_, _ int, v float64) float64 {
+func Sigmoid(x matrix.Matrix) matrix.Matrix {
+	sigmoid := func(v float64) float64 {
 		return 1 / (1 + math.Exp(-v))
 	}
-	var y mat.Dense
-	y.Apply(sigmoid, x)
-	return &y
+	return x.CopyApply(sigmoid)
 }
 
-func ReLU(x mat.Matrix) mat.Matrix {
-	relu := func(_, _ int, v float64) float64 {
+func ReLU(x matrix.Matrix) matrix.Matrix {
+	relu := func(v float64) float64 {
 		return math.Max(0, v)
 	}
-	var y mat.Dense
-	y.Apply(relu, x)
-	return &y
+	return x.CopyApply(relu)
 }
 
-func IdentityFunction(x mat.Matrix) mat.Matrix {
+func IdentityFunction(x matrix.Matrix) matrix.Matrix {
 	return x
 }
 
-func Exp(x mat.Matrix) mat.Matrix {
-	exp := func(_, _ int, v float64) float64 {
+func Exp(x matrix.Matrix) matrix.Matrix {
+	exp := func(v float64) float64 {
 		return math.Exp(v)
 	}
-	var y mat.Dense
-	y.Apply(exp, x)
-	return &y
+	return x.CopyApply(exp)
 }
 
-func Softmax(x mat.Matrix) mat.Matrix {
-	c := mat.Max(x)
-	expX := Exp(util.SubScalar(x, c))
-	sumExpX := mat.Sum(expX)
-	return util.Scale(expX, 1/sumExpX)
+func Softmax(x matrix.Matrix) matrix.Matrix {
+	c := x.Max().At(0, 0)
+	expX := Exp(x.CopySubFloat(-c))
+	sumExpX := expX.Sum().At(0, 0)
+	return expX.CopyDivFloat(sumExpX)
 }
 
-func NewNetwork() (map[string]mat.Matrix, error) {
-	f, err := npz.Open("data/sample_weight.npz")
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	var network = map[string]mat.Matrix{}
-	for _, name := range f.Keys() {
-		m, err := LoadNPY(f, name)
+func NewNetwork() (map[string]matrix.Matrix, error) {
+	weights := []string{"W1", "W2", "W3", "b1", "b2", "b3"}
+	network := map[string]matrix.Matrix{}
+	for _, w := range weights {
+		p := fmt.Sprintf("data/weights/%s.npy", w)
+		f, err := os.Open(p)
 		if err != nil {
 			return nil, err
 		}
-		network[strings.Split(name, ".npy")[0]] = m
+		defer f.Close()
+
+		r, err := npyio.NewReader(f)
+		if err != nil {
+			return nil, err
+		}
+
+		shape := r.Header.Descr.Shape
+
+		if len(shape) == 1 {
+			raw := make([]float32, shape[0])
+			err = r.Read(&raw)
+			if err != nil {
+				return nil, err
+			}
+
+			var tmp []float64
+			for _, v := range raw {
+				tmp = append(tmp, float64(v))
+			}
+
+			network[w] = matrix.New1D(tmp...)
+
+			continue
+		}
+
+		raw := make([]float32, shape[0]*shape[1])
+		err = r.Read(&raw)
+		if err != nil {
+			return nil, err
+		}
+
+		var raw64 [][]float64
+		for i := 0; i < shape[0]; i++ {
+			tmp := make([]float64, 0, shape[1])
+			for j := 0; j < shape[1]; j++ {
+				tmp = append(tmp, float64(raw[j*shape[0]+i]))
+			}
+			raw64 = append(raw64, tmp)
+		}
+
+		network[w] = matrix.New2D(raw64)
 	}
+
 	return network, nil
 }
 
-func LoadNPY(z *npz.Reader, name string) (mat.Matrix, error) {
-	shape := z.Header(name).Descr.Shape
-	var raw []float32
-	if len(shape) == 1 {
-		raw = make([]float32, shape[0])
-	} else {
-		raw = make([]float32, shape[0]*shape[1])
-	}
-
-	err := z.Read(name, &raw)
-	if err != nil {
-		return nil, err
-	}
-	var raw64 []float64
-	for _, v := range raw {
-		raw64 = append(raw64, float64(v))
-	}
-	var m *mat.Dense
-	if len(shape) == 1 {
-		m = mat.NewDense(1, shape[0], raw64)
-		return m, nil
-	}
-	m = mat.NewDense(shape[0], shape[1], raw64)
-	return m, nil
-}
-
-func Forward(network map[string]mat.Matrix, x mat.Matrix) mat.Matrix {
+func Forward(network map[string]matrix.Matrix, x matrix.Matrix) matrix.Matrix {
 	W1, W2, W3 := network["W1"], network["W2"], network["W3"]
 	b1, b2, b3 := network["b1"], network["b2"], network["b3"]
 
-	A1 := util.Add(util.Mul(x, W1), b1)
+	A1 := x.CopyMatMul(W1).CopyAdd(b1)
 	Z1 := Sigmoid(A1)
-	A2 := util.Add(util.Mul(Z1, W2), b2)
+	A2 := Z1.CopyMatMul(W2).CopyAdd(b2)
 	Z2 := Sigmoid(A2)
-	A3 := util.Add(util.Mul(Z2, W3), b3)
+	A3 := Z2.CopyMatMul(W3).CopyAdd(b3)
 	Y := IdentityFunction(A3)
 
 	return Y
 }
 
-func getData() (x, t mat.Matrix) {
-	d, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	_, testDataset, err := LoadMatrix(d)
-	if err != nil {
-		panic(err)
-	}
-
-	xTest, tTest := testDataset.Images, testDataset.Labels
-	return xTest, tTest
-}
-
-func predict(network map[string]mat.Matrix, x mat.Matrix) mat.Matrix {
+func predict(network map[string]matrix.Matrix, x matrix.Matrix) matrix.Matrix {
 	W1, W2, W3 := network["W1"], network["W2"], network["W3"]
 	b1, b2, b3 := network["b1"], network["b2"], network["b3"]
 
-	A1 := util.Add(util.Mul(x, W1), b1)
+	A1 := x.CopyMatMul(W1).CopyAdd(b1)
 	Z1 := Sigmoid(A1)
-	A2 := util.Add(util.Mul(Z1, W2), b2)
+	A2 := Z1.CopyMatMul(W2).CopyAdd(b2)
 	Z2 := Sigmoid(A2)
-	A3 := util.Add(util.Mul(Z2, W3), b3)
+	A3 := Z2.CopyMatMul(W3).CopyAdd(b3)
 	Y := Softmax(A3)
 
 	return Y
 }
 
-func Argmax(matrix mat.Matrix) (int, int) {
+func Argmax(matrix matrix.Matrix) (int, int) {
 	rows, cols := matrix.Dims()
 
 	var maxVal float64
