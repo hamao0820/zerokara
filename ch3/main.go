@@ -189,14 +189,29 @@ func main() {
 		panic(err)
 	}
 
+	batchSize := 100
 	accuracyCnt := 0
-	for i := 0; i < testSet.Len(); i++ {
-		img, label := testSet.Get(i)
-		y := predict(network, img)
-		p := int(y.ArgMax().At(0, 0))
-		if p == int(label.At(0, 0)) {
-			accuracyCnt++
+	for i := 0; i < testSet.Len(); i += batchSize {
+		var xs []matrix.Matrix
+		tmp := make([]float64, batchSize)
+		for j := 0; j < batchSize; j++ {
+			x, t := testSet.Get(i + j)
+			xs = append(xs, x)
+			tmp[j] = t.At(0, 0)
 		}
+
+		xBatch := matrix.Merge1DMatrixes(xs...)
+		tBatch := matrix.New1D(tmp...)
+
+		y := predict(network, xBatch)
+		p := y.ArgMax(matrix.Axis(1))
+
+		accuracyCnt += int(tBatch.CopySub(p).CopyApply(func(v float64) float64 {
+			if v == 0 {
+				return 1
+			}
+			return 0
+		}).Sum().At(0, 0))
 	}
 
 	fmt.Println("Accuracy:", float64(accuracyCnt)/float64(testSet.Len()))
@@ -318,11 +333,15 @@ func predict(network map[string]matrix.Matrix, x matrix.Matrix) matrix.Matrix {
 	W1, W2, W3 := network["W1"], network["W2"], network["W3"]
 	b1, b2, b3 := network["b1"], network["b2"], network["b3"]
 
-	A1 := x.CopyMatMul(W1).CopyAdd(b1)
+	b1_ := b1.Broadcast(matrix.Shape{R: x.Rows(), C: b1.Cols()})
+	b2_ := b2.Broadcast(matrix.Shape{R: x.Rows(), C: b2.Cols()})
+	b3_ := b3.Broadcast(matrix.Shape{R: x.Rows(), C: b3.Cols()})
+
+	A1 := x.CopyMatMul(W1).CopyAdd(b1_)
 	Z1 := Sigmoid(A1)
-	A2 := Z1.CopyMatMul(W2).CopyAdd(b2)
+	A2 := Z1.CopyMatMul(W2).CopyAdd(b2_)
 	Z2 := Sigmoid(A2)
-	A3 := Z2.CopyMatMul(W3).CopyAdd(b3)
+	A3 := Z2.CopyMatMul(W3).CopyAdd(b3_)
 	Y := Softmax(A3)
 
 	return Y
